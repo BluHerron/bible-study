@@ -28,7 +28,18 @@ jobs:
         run: |
           mkdir -p extracted site
 
-          unzip -q bible-study-github-pages.zip -d extracted
+          if [ -f "bible-study-github-pages.zip" ]; then
+  zip_file="bible-study-github-pages.zip"
+elif [ -f "bible-study-local-ai-updated.zip" ]; then
+  zip_file="bible-study-local-ai-updated.zip"
+else
+  echo "ERROR: Website ZIP not found."
+  find . -maxdepth 1 -type f -name "*.zip" -print
+  exit 1
+fi
+
+echo "Using website archive: $zip_file"
+unzip -q "$zip_file" -d extracted
 
           echo "Searching for index.html..."
 
