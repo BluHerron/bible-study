@@ -25,21 +25,21 @@ jobs:
 
       - name: Extract website
         shell: bash
-        run: |
+                run: |
           mkdir -p extracted site
 
           if [ -f "bible-study-github-pages.zip" ]; then
-  zip_file="bible-study-github-pages.zip"
-elif [ -f "bible-study-local-ai-updated.zip" ]; then
-  zip_file="bible-study-local-ai-updated.zip"
-else
-  echo "ERROR: Website ZIP not found."
-  find . -maxdepth 1 -type f -name "*.zip" -print
-  exit 1
-fi
+            zip_file="bible-study-github-pages.zip"
+          elif [ -f "bible-study-local-ai-updated.zip" ]; then
+            zip_file="bible-study-local-ai-updated.zip"
+          else
+            echo "ERROR: Website ZIP not found."
+            find . -maxdepth 1 -type f -name "*.zip" -print
+            exit 1
+          fi
 
-echo "Using website archive: $zip_file"
-unzip -q "$zip_file" -d extracted
+          echo "Using website archive: $zip_file"
+          unzip -q "$zip_file" -d extracted
 
           echo "Searching for index.html..."
 
@@ -47,15 +47,11 @@ unzip -q "$zip_file" -d extracted
 
           if [ -z "$index_file" ]; then
             echo "ERROR: No index.html found in ZIP."
-            echo "ZIP contents:"
             find extracted -maxdepth 5 -type f
             exit 1
           fi
 
           website_dir=$(dirname "$index_file")
-
-          echo "Website found in: $website_dir"
-
           cp -a "$website_dir"/. site/
 
           if [ ! -f site/index.html ]; then
@@ -65,11 +61,6 @@ unzip -q "$zip_file" -d extracted
 
           echo "Website files ready:"
           ls -la site/
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
