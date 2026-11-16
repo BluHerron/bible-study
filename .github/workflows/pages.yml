@@ -1,3 +1,4 @@
+
 name: Deploy Bible Study to GitHub Pages
 
 on:
@@ -19,13 +20,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/configure-pages@v5
 
       - name: Extract website
+        shell: bash
         run: |
-          mkdir -p site
-          unzip -q bible-study-github-pages.zip -d site
-          test -f site/index.html
+          mkdir -p extracted site
+
+          unzip -q bible-study-github-pages.zip -d extracted
+
+          echo "Searching for index.html..."
+
+          index_file=$(find extracted -type f -name index.html -print -quit)
+
+          if [ -z "$index_file" ]; then
+            echo "ERROR: No index.html found in ZIP."
+            echo "ZIP contents:"
+            find extracted -maxdepth 5 -type f
+            exit 1
+          fi
+
+          website_dir=$(dirname "$index_file")
+
+          echo "Website found in: $website_dir"
+
+          cp -a "$website_dir"/. site/
+
+          if [ ! -f site/index.html ]; then
+            echo "ERROR: Website index.html missing."
+            exit 1
+          fi
+
+          echo "Website files ready:"
+          ls -la site/
 
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -37,6 +65,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Deploy
         id: deployment
